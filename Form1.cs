@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace DWG2DXFReaderNET
 {
     public partial class Form1 : Form
     {
+        private string DWGFileConverterFullPath = "";
         public Form1()
         {
             InitializeComponent();
@@ -39,6 +41,12 @@ namespace DWG2DXFReaderNET
 
         private void loadDWGFileToolStripMenuItem1_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(DWGFileConverterFullPath)
+                || !System.IO.File.Exists(DWGFileConverterFullPath))
+            {
+                MessageBox.Show("Please select the File Converter executable file first.", "DWG to DXF Converter", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             openFileDialog1.DefaultExt = "dwg";
             openFileDialog1.Filter = "DWG|*.dwg|All files (*.*)|*.*";
             openFileDialog1.FileName = "";
@@ -49,7 +57,8 @@ namespace DWG2DXFReaderNET
                 System.IO.Directory.CreateDirectory(@"tempdir/dxf");
                 System.IO.File.Copy(openFileDialog1.FileName, @"tempdir\tmpfile.dwg", true);
                 ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = @"C:\Program Files\ODA\ODAFileConverter 23.5.0\ODAFileConverter.exe";
+                //startInfo.FileName = @"C:\Program Files\ODA\ODAFileConverter 23.5.0\ODAFileConverter.exe";
+                startInfo.FileName = DWGFileConverterFullPath;
                 startInfo.Arguments = " \"tempdir\"  \"tempdir/dxf\" \"ACAD2018\" \"DXF\" \"0\" \"0\"";
                 startInfo.UseShellExecute = true;
                 startInfo.CreateNoWindow = true;
@@ -91,6 +100,12 @@ namespace DWG2DXFReaderNET
 
         private void saveDXFToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(DWGFileConverterFullPath)
+                || !System.IO.File.Exists(DWGFileConverterFullPath))
+            {
+                MessageBox.Show("Please select the File Converter executable file first.", "DWG to DXF Converter", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             saveFileDialog1.DefaultExt = "dxf";
             saveFileDialog1.Filter = "DXF|*.dxf";
             saveFileDialog1.FileName = "drawing.dxf";
@@ -114,7 +129,7 @@ namespace DWG2DXFReaderNET
 
                
                 ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = @"C:\Program Files\ODA\ODAFileConverter 23.5.0\ODAFileConverter.exe";
+                startInfo.FileName = DWGFileConverterFullPath;
                 startInfo.Arguments = " \"tempdir/dxf\"  \"tempdir\" \"ACAD2018\" \"DWG\" \"0\" \"0\"";
 
                 startInfo.UseShellExecute = true;
@@ -132,6 +147,31 @@ namespace DWG2DXFReaderNET
                 System.IO.Directory.Delete(@"tempdir/dxf");
                 
                 System.IO.Directory.Delete(@"tempdir");
+
+            }
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.DefaultExt = "exe";
+            openFileDialog1.Filter = "EXE file|*.exe";
+            openFileDialog1.FileName = DWGFileConverterFullPath;
+            if (DWGFileConverterFullPath != "")
+            {
+                openFileDialog1.InitialDirectory = Path.GetDirectoryName(DWGFileConverterFullPath);
+            }
+            else
+            {
+                openFileDialog1.InitialDirectory = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
+            }
+
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                DWGFileConverterFullPath = openFileDialog1.FileName;
+
+
+
 
             }
         }
